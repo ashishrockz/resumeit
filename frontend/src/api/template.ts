@@ -53,3 +53,9 @@ export const createTemplate = async (data: CreateTemplateData) => {
 
   return response.json();
 };
+
+// Modify getTemplates or create a new function if admin view is different
+// For now, assuming getTemplates can be used by admin as well
+// export const getTemplates = async (): Promise<Template[]> => { ... };
+
+// Add admin specific template functions if needed (e.g., create, update, delete)

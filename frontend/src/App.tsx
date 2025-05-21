@@ -10,16 +10,26 @@ import { UserDashboardPage } from "./pages/UserDashboardPage";
 import { TemplateSelectionPage } from "./pages/TemplateSelectionPage";
 import { TemplateCreationPage } from "./pages/TemplateCreationPage";
 import { TemplateDownloadPage } from "./pages/TemplateDownloadPage";
+import { AdminDashboardPage } from "./pages/AdminDashboardPage"; // Import AdminDashboardPage
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 // Helper component for protected routes
-function ProtectedRoute({ children }: { children: JSX.Element }) {
+function ProtectedRoute({ children, adminOnly = false }: { children: JSX.Element; adminOnly?: boolean }) {
   const isAuthenticated = localStorage.getItem('accessToken') !== null;
+  // TODO: Implement actual role checking based on user data
+  const isAdmin = localStorage.getItem('userRole') === 'admin'; // Placeholder for role check
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
+
+  if (adminOnly && !isAdmin) {
+    // Redirect non-admin users from admin routes
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return children;
 }
 
@@ -35,7 +45,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
-            {/* Protected Routes */}
+            {/* User Protected Routes */}
             <Route
               path="/dashboard"
               element={
@@ -70,6 +80,18 @@ function App() {
             />
             {/* Add a route for editing a resume */}
             {/* <Route path="/resume/:resumeId/edit" element={<ProtectedRoute><ResumeEditorPage /></ProtectedRoute>} /> */}
+
+            {/* Admin Protected Routes */}
+             <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            {/* TODO: Add more admin routes (users, templates, subscriptions) */}
+
 
             <Route path="*" element={<NotFound />} />
           </Routes>

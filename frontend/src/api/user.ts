@@ -33,7 +33,7 @@ export interface Subscription {
 export const userApi = {
   getCurrentUser: async (): Promise<User> => {
     const token = localStorage.getItem('accessToken');
-    
+
     const response = await fetch(`${API_URL}/users/me/`, {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -50,7 +50,7 @@ export const userApi = {
 
   getUserSubscription: async (): Promise<Subscription | null> => {
     const token = localStorage.getItem('accessToken');
-    
+
     const response = await fetch(`${API_URL}/subscriptions/`, {
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -64,4 +64,33 @@ export const userApi = {
     const data = await response.json();
     return data.results.length > 0 ? data.results[0] : null;
   },
+};
+
+export const getUsers = async () => {
+  // TODO: Implement actual API call to fetch all users (admin view)
+  // const response = await fetch(`${API_URL}/users/`, {
+  //   headers: {
+  //     'Authorization': `Bearer ${localStorage.getItem('accessToken')}`, // Assuming admin token
+  //   },
+  // });
+
+  // if (!response.ok) {
+  //   throw new Error('Failed to fetch users');
+  // }
+
+  // return response.json();
+
+  // Returning mock data for now
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        count: 50, // Total users
+        results: [
+          // Sample user data
+          { id: 1, username: "user1", email: "user1@example.com", role: "user" },
+          { id: 2, username: "admin1", email: "admin1@example.com", role: "admin" },
+        ]
+      });
+    }, 1500);
+  });
 };

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, FileText, User, LogIn, LayoutDashboard, LogOut } from "lucide-react";
+import { Menu, X, FileText, User, LogIn, LayoutDashboard, LogOut, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth"; // Import the useAuth hook
 
@@ -8,6 +8,9 @@ export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { logout, isLoggingOut } = useAuth(); // Use the useAuth hook
   const isLoggedIn = localStorage.getItem('accessToken') !== null; // Check for access token
+  // TODO: Get actual user role from auth context or state
+  const isAdmin = localStorage.getItem('userRole') === 'admin'; // Placeholder for role check
+
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -33,6 +36,14 @@ export function Navbar() {
 
           {isLoggedIn ? (
             <div className="flex items-center gap-4">
+              {isAdmin && (
+                 <Link to="/admin/dashboard">
+                  <Button variant="outline" size="sm" className="gap-2">
+                     <Shield className="h-4 w-4" />
+                    Admin
+                  </Button>
+                </Link>
+              )}
               <Link to="/dashboard">
                 <Button variant="outline" size="sm" className="gap-2">
                    <LayoutDashboard className="h-4 w-4" />
@@ -110,6 +121,14 @@ export function Navbar() {
 
             {isLoggedIn ? (
               <div className="flex flex-col space-y-2 pt-2">
+                 {isAdmin && (
+                   <Link to="/admin/dashboard" onClick={() => setIsMenuOpen(false)}>
+                    <Button variant="outline" className="w-full gap-2">
+                       <Shield className="h-4 w-4" />
+                      Admin
+                    </Button>
+                  </Link>
+                )}
                  <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>
                   <Button variant="outline" className="w-full gap-2">
                      <LayoutDashboard className="h-4 w-4" />

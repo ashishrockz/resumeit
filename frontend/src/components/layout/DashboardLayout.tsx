@@ -1,192 +1,65 @@
-import { ReactNode, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { 
-  FileText, 
-  LayoutDashboard, 
-  Settings, 
-  CreditCard, 
-  Users, 
-  LogOut, 
-  Menu, 
-  X,
-  ChevronRight,
-  User
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
+import { ReactNode } from "react";
+import { Link } from "react-router-dom";
+import { FileText, LayoutDashboard, Users, FileTextIcon, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DashboardLayoutProps {
   children: ReactNode;
+  isAdmin?: boolean; // Prop to differentiate between user and admin dashboard
 }
 
-interface SidebarItemProps {
-  icon: ReactNode;
-  label: string;
-  href: string;
-  active?: boolean;
-}
-
-function SidebarItem({ icon, label, href, active }: SidebarItemProps) {
-  return (
-    <Link to={href}>
-      <div
-        className={cn(
-          "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-accent",
-          active ? "bg-accent text-accent-foreground" : "text-muted-foreground"
-        )}
-      >
-        {icon}
-        <span>{label}</span>
-        {active && <ChevronRight className="ml-auto h-4 w-4" />}
-      </div>
-    </Link>
-  );
-}
-
-export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { logout } = useAuth();
-  const location = useLocation();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const isActive = (path: string) => location.pathname === path;
+export function DashboardLayout({ children, isAdmin = false }: DashboardLayoutProps) {
+  const navItems = isAdmin
+    ? [
+        { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+        { name: "Users", href: "/admin/users", icon: Users },
+        { name: "Templates", href: "/admin/templates", icon: FileTextIcon },
+        { name: "Subscriptions", href: "/admin/subscriptions", icon: DollarSign },
+        // Add more admin specific links here
+      ]
+    : [
+        { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+        { name: "My Resumes", href: "/dashboard/resumes", icon: FileTextIcon },
+        { name: "Templates", href: "/templates", icon: FileTextIcon },
+        // Add more user specific links here
+      ];
 
   return (
-    <div className="flex min-h-screen flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Link to="/" className="flex items-center gap-2">
-              <FileText className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold">ResumeIt</span>
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            >
-              {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
-
-            <div className="hidden md:flex items-center gap-4">
-              <Link to="/profile">
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <User className="h-4 w-4" />
-                  Profile
-                </Button>
-              </Link>
-              <Button variant="ghost" size="sm" className="gap-2" onClick={logout}>
-                <LogOut className="h-4 w-4" />
-                Logout
-              </Button>
-            </div>
-          </div>
+    <div className="flex min-h-screen">
+      {/* Sidebar */}
+      <aside className="w-64 border-r bg-background p-4 hidden md:block">
+        <div className="flex items-center gap-2 mb-6">
+          <FileText className="h-6 w-6 text-primary" />
+          <span className="text-xl font-bold">ResumeIt</span>
         </div>
-      </header>
+        <nav className="flex flex-col space-y-2">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              to={item.href}
+              className={cn(
+                "flex items-center gap-3 rounded-md px-3 py-2 text-muted-foreground transition-all hover:text-primary",
+                // Add active link styling here if needed
+              )}
+            >
+              <item.icon className="h-4 w-4" />
+              {item.name}
+            </Link>
+          ))}
+        </nav>
+      </aside>
 
-      <div className="flex flex-1">
-        {/* Sidebar - Desktop */}
-        <aside className="hidden md:flex w-64 flex-col border-r bg-background">
-          <div className="flex flex-col gap-2 p-4">
-            <SidebarItem
-              icon={<LayoutDashboard className="h-5 w-5" />}
-              label="Dashboard"
-              href="/dashboard"
-              active={isActive("/dashboard")}
-            />
-            <SidebarItem
-              icon={<FileText className="h-5 w-5" />}
-              label="My Resumes"
-              href="/resumes"
-              active={isActive("/resumes")}
-            />
-            <SidebarItem
-              icon={<FileText className="h-5 w-5" />}
-              label="Templates"
-              href="/templates"
-              active={isActive("/templates")}
-            />
-            <SidebarItem
-              icon={<CreditCard className="h-5 w-5" />}
-              label="Subscription"
-              href="/subscription"
-              active={isActive("/subscription")}
-            />
-            <SidebarItem
-              icon={<Users className="h-5 w-5" />}
-              label="Referrals"
-              href="/referrals"
-              active={isActive("/referrals")}
-            />
-            <SidebarItem
-              icon={<Settings className="h-5 w-5" />}
-              label="Settings"
-              href="/settings"
-              active={isActive("/settings")}
-            />
-          </div>
-        </aside>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Navbar (Optional, can be included in MainLayout or here) */}
+        {/* <Navbar /> */}
 
-        {/* Sidebar - Mobile */}
-        {isSidebarOpen && (
-          <div className="fixed inset-0 z-40 md:hidden">
-            <div className="fixed inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />
-            <div className="fixed inset-y-0 left-0 z-50 w-64 bg-background p-4 shadow-lg">
-              <div className="flex flex-col gap-2">
-                <SidebarItem
-                  icon={<LayoutDashboard className="h-5 w-5" />}
-                  label="Dashboard"
-                  href="/dashboard"
-                  active={isActive("/dashboard")}
-                />
-                <SidebarItem
-                  icon={<FileText className="h-5 w-5" />}
-                  label="My Resumes"
-                  href="/resumes"
-                  active={isActive("/resumes")}
-                />
-                <SidebarItem
-                  icon={<FileText className="h-5 w-5" />}
-                  label="Templates"
-                  href="/templates"
-                  active={isActive("/templates")}
-                />
-                <SidebarItem
-                  icon={<CreditCard className="h-5 w-5" />}
-                  label="Subscription"
-                  href="/subscription"
-                  active={isActive("/subscription")}
-                />
-                <SidebarItem
-                  icon={<Users className="h-5 w-5" />}
-                  label="Referrals"
-                  href="/referrals"
-                  active={isActive("/referrals")}
-                />
-                <SidebarItem
-                  icon={<Settings className="h-5 w-5" />}
-                  label="Settings"
-                  href="/settings"
-                  active={isActive("/settings")}
-                />
-                <div className="mt-auto pt-4">
-                  <Button variant="ghost" className="w-full justify-start gap-2" onClick={logout}>
-                    <LogOut className="h-5 w-5" />
-                    Logout
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <main className="flex-1 p-4 md:p-6">
+          {children}
+        </main>
 
-        {/* Main Content */}
-        <main className="flex-1 overflow-auto p-6">{children}</main>
+        {/* Footer (Optional) */}
+        {/* <Footer /> */}
       </div>
     </div>
   );
