@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, FileText, User, LogIn, LayoutDashboard, LogOut, Shield } from "lucide-react";
+import { Menu, X, FileText, User, LogIn, LayoutDashboard, LogOut, Shield, Search } from "lucide-react"; // Import Search icon
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth"; // Import the useAuth hook
 
@@ -8,8 +8,9 @@ export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { logout, isLoggingOut } = useAuth(); // Use the useAuth hook
   const isLoggedIn = localStorage.getItem('accessToken') !== null; // Check for access token
-  // TODO: Get actual user role from auth context or state
+  // TODO: Get actual user role and premium status from auth context or state
   const isAdmin = localStorage.getItem('userRole') === 'admin'; // Placeholder for role check
+  const isPremium = true; // Placeholder for premium status
 
 
   return (
@@ -50,6 +51,14 @@ export function Navbar() {
                   Dashboard
                 </Button>
               </Link>
+               {isPremium && (
+                 <Link to="/ats-check"> {/* Link to ATS Check page */}
+                  <Button variant="outline" size="sm" className="gap-2">
+                     <Search className="h-4 w-4" />
+                    ATS Check
+                  </Button>
+                </Link>
+              )}
               <Link to="/profile">
                 <Button size="sm" className="gap-2">
                   <User className="h-4 w-4" />
@@ -135,6 +144,14 @@ export function Navbar() {
                     Dashboard
                   </Button>
                 </Link>
+                 {isPremium && (
+                   <Link to="/ats-check" onClick={() => setIsMenuOpen(false)}> {/* Link to ATS Check page */}
+                    <Button variant="outline" className="w-full gap-2">
+                       <Search className="h-4 w-4" />
+                      ATS Check
+                    </Button>
+                  </Link>
+                )}
                 <Link to="/profile" onClick={() => setIsMenuOpen(false)}>
                   <Button className="w-full gap-2">
                     <User className="h-4 w-4" />

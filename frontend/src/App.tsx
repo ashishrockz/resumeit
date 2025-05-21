@@ -11,6 +11,7 @@ import { TemplateSelectionPage } from "./pages/TemplateSelectionPage";
 import { TemplateCreationPage } from "./pages/TemplateCreationPage";
 import { TemplateDownloadPage } from "./pages/TemplateDownloadPage";
 import { AdminDashboardPage } from "./pages/AdminDashboardPage"; // Import AdminDashboardPage
+import { ATSCheckPage } from "./pages/ATSCheckPage"; // Import ATSCheckPage
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,7 @@ function ProtectedRoute({ children, adminOnly = false }: { children: JSX.Element
   const isAuthenticated = localStorage.getItem('accessToken') !== null;
   // TODO: Implement actual role checking based on user data
   const isAdmin = localStorage.getItem('userRole') === 'admin'; // Placeholder for role check
+  // TODO: Implement premium subscription check for ATS page
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -29,6 +31,8 @@ function ProtectedRoute({ children, adminOnly = false }: { children: JSX.Element
     // Redirect non-admin users from admin routes
     return <Navigate to="/dashboard" replace />;
   }
+
+  // TODO: Add premium check here for ATSCheckPage route
 
   return children;
 }
@@ -75,6 +79,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <TemplateDownloadPage />
+                </ProtectedRoute>
+              }
+            />
+             <Route
+              path="/resume/:resumeId/ats-check" // Route with resumeId parameter
+              element={
+                <ProtectedRoute> {/* TODO: Add premium check here */}
+                  <ATSCheckPage />
                 </ProtectedRoute>
               }
             />
