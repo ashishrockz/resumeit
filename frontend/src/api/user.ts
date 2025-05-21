@@ -67,30 +67,16 @@ export const userApi = {
 };
 
 export const getUsers = async () => {
-  // TODO: Implement actual API call to fetch all users (admin view)
-  // const response = await fetch(`${API_URL}/users/`, {
-  //   headers: {
-  //     'Authorization': `Bearer ${localStorage.getItem('accessToken')}`, // Assuming admin token
-  //   },
-  // });
-
-  // if (!response.ok) {
-  //   throw new Error('Failed to fetch users');
-  // }
-
-  // return response.json();
-
-  // Returning mock data for now
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        count: 50, // Total users
-        results: [
-          // Sample user data
-          { id: 1, username: "user1", email: "user1@example.com", role: "user" },
-          { id: 2, username: "admin1", email: "admin1@example.com", role: "admin" },
-        ]
-      });
-    }, 1500);
+  const response = await fetch(`${API_URL}/users/`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('accessToken')}`, // Assuming admin token
+    },
   });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to fetch users');
+  }
+
+  return response.json();
 };

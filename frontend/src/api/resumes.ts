@@ -1,106 +1,22 @@
+// This file seems to be a duplicate of resume.ts, let's consolidate and use resume.ts
+// I will add the admin specific resume fetching function here if needed, otherwise use the existing one.
+// Based on the swagger, there is a GET /resumes/ endpoint which should list all resumes.
+
+import { Resume } from "@/pages/UserDashboardPage"; // Import the Resume type
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
-export interface Resume {
-  id: number;
-  title: string;
-  content: Record<string, any>;
-  template: number | null;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
+export const getAllResumes = async () => {
+  const response = await fetch(`${API_URL}/resumes/`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('accessToken')}`, // Assuming admin token
+    },
+  });
 
-export interface ResumeCreate {
-  title: string;
-  content: Record<string, any>;
-  template: number | null;
-  is_active: boolean;
-}
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to fetch resumes');
+  }
 
-export const resumesApi = {
-  getResumes: async (): Promise<Resume[]> => {
-    const token = localStorage.getItem('accessToken');
-    
-    const response = await fetch(`${API_URL}/resumes/`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch resumes');
-    }
-
-    const data = await response.json();
-    return data.results;
-  },
-
-  getResume: async (id: number): Promise<Resume> => {
-    const token = localStorage.getItem('accessToken');
-    
-    const response = await fetch(`${API_URL}/resumes/${id}/`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch resume');
-    }
-
-    return response.json();
-  },
-
-  createResume: async (data: ResumeCreate): Promise<Resume> => {
-    const token = localStorage.getItem('accessToken');
-    
-    const response = await fetch(`${API_URL}/resumes/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to create resume');
-    }
-
-    return response.json();
-  },
-
-  updateResume: async (id: number, data: Partial<ResumeCreate>): Promise<Resume> => {
-    const token = localStorage.getItem('accessToken');
-    
-    const response = await fetch(`${API_URL}/resumes/${id}/`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to update resume');
-    }
-
-    return response.json();
-  },
-
-  deleteResume: async (id: number): Promise<void> => {
-    const token = localStorage.getItem('accessToken');
-    
-    const response = await fetch(`${API_URL}/resumes/${id}/`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to delete resume');
-    }
-  },
+  return response.json();
 };
