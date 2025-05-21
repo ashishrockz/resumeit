@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, FileText, User, LogIn, LayoutDashboard } from "lucide-react";
+import { Menu, X, FileText, User, LogIn, LayoutDashboard, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth"; // Import the useAuth hook
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { logout, isLoggingOut } = useAuth(); // Use the useAuth hook
   const isLoggedIn = localStorage.getItem('accessToken') !== null; // Check for access token
 
   return (
@@ -33,7 +35,7 @@ export function Navbar() {
             <div className="flex items-center gap-4">
               <Link to="/dashboard">
                 <Button variant="outline" size="sm" className="gap-2">
-                  <LayoutDashboard className="h-4 w-4" />
+                   <LayoutDashboard className="h-4 w-4" />
                   Dashboard
                 </Button>
               </Link>
@@ -44,8 +46,15 @@ export function Navbar() {
                 </Button>
               </Link>
               {/* Add Logout Button */}
-              <Button variant="ghost" size="sm" onClick={() => { /* Implement logout logic */ }}>
-                Logout
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => logout()} // Call the logout function
+                disabled={isLoggingOut}
+                className="gap-2"
+              >
+                 <LogOut className="h-4 w-4" />
+                {isLoggingOut ? "Logging out..." : "Logout"}
               </Button>
             </div>
           ) : (
@@ -114,8 +123,14 @@ export function Navbar() {
                   </Button>
                 </Link>
                  {/* Add Logout Button */}
-                <Button variant="ghost" className="w-full" onClick={() => { /* Implement logout logic */ setIsMenuOpen(false)}}>
-                  Logout
+                <Button
+                  variant="ghost"
+                  className="w-full gap-2"
+                  onClick={() => { logout(); setIsMenuOpen(false); }} // Call logout and close menu
+                  disabled={isLoggingOut}
+                >
+                   <LogOut className="h-4 w-4" />
+                  {isLoggingOut ? "Logging out..." : "Logout"}
                 </Button>
               </div>
             ) : (

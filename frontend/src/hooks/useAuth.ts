@@ -48,10 +48,32 @@ export const useAuth = () => {
     },
   });
 
+  const logoutMutation = useMutation({
+    mutationFn: authApi.logout,
+    onSuccess: () => {
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out.",
+      });
+      navigate('/login');
+    },
+    onError: (error: Error) => {
+       // Even if backend logout fails, we clear local storage for a better user experience
+      console.error('Logout failed:', error);
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+       toast({
+        variant: "destructive",
+        title: "Logout failed",
+        description: error.message || "An error occurred during logout.",
+      });
+      navigate('/login');
+    },
+  });
+
+
   const logout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    navigate('/login');
+    logoutMutation.mutate();
   };
 
   return {
@@ -60,5 +82,6 @@ export const useAuth = () => {
     logout,
     isLoggingIn: loginMutation.isPending,
     isRegistering: registerMutation.isPending,
+    isLoggingOut: logoutMutation.isPending,
   };
 };

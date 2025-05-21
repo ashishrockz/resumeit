@@ -53,4 +53,26 @@ export const authApi = {
 
     return response.json();
   },
+
+  logout: async (): Promise<void> => {
+    // In a real application, you might want to call a backend endpoint
+    // to invalidate the token on the server side.
+    // For this example, we'll just clear the tokens from local storage.
+    // const response = await fetch(`${API_URL}/logout/`, {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+    //   },
+    // });
+
+    // if (!response.ok) {
+    //   const error = await response.json();
+    //   console.error('Backend logout failed:', error);
+    //   // We might still want to clear local storage even if backend fails
+    // }
+
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+  },
 };
