@@ -45,3 +45,22 @@ export const getSubscriptionDetails = async (id: number) => {
 
   return response.json();
 };
+
+// Function to update a subscription
+export const updateSubscription = async (id: number, data: any) => { // Use 'any' for now, refine type later
+  const response = await fetch(`${API_URL}/subscriptions/${id}/`, {
+    method: 'PATCH', // Use PATCH for partial updates
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('accessToken')}`, // Assuming admin token
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(Object.values(error).flat().join(', ') || `Failed to update subscription with ID ${id}`);
+  }
+
+  return response.json();
+};
