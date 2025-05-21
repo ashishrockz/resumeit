@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, FileText, User, LogIn } from "lucide-react";
+import { Menu, X, FileText, User, LogIn, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const isLoggedIn = false; // Replace with actual auth state
+  const isLoggedIn = localStorage.getItem('accessToken') !== null; // Check for access token
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -28,11 +28,14 @@ export function Navbar() {
           <Link to="/about" className="text-sm font-medium hover:text-primary">
             About
           </Link>
-          
+
           {isLoggedIn ? (
             <div className="flex items-center gap-4">
               <Link to="/dashboard">
-                <Button variant="outline" size="sm">Dashboard</Button>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <LayoutDashboard className="h-4 w-4" />
+                  Dashboard
+                </Button>
               </Link>
               <Link to="/profile">
                 <Button size="sm" className="gap-2">
@@ -40,6 +43,10 @@ export function Navbar() {
                   Profile
                 </Button>
               </Link>
+              {/* Add Logout Button */}
+              <Button variant="ghost" size="sm" onClick={() => { /* Implement logout logic */ }}>
+                Logout
+              </Button>
             </div>
           ) : (
             <div className="flex items-center gap-4">
@@ -54,7 +61,7 @@ export function Navbar() {
         </nav>
 
         {/* Mobile Menu Button */}
-        <button 
+        <button
           className="md:hidden"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
@@ -70,32 +77,35 @@ export function Navbar() {
       {isMenuOpen && (
         <div className="md:hidden container py-4 pb-6 border-b">
           <nav className="flex flex-col space-y-4">
-            <Link 
-              to="/templates" 
+            <Link
+              to="/templates"
               className="text-sm font-medium hover:text-primary"
               onClick={() => setIsMenuOpen(false)}
             >
               Templates
             </Link>
-            <Link 
-              to="/pricing" 
+            <Link
+              to="/pricing"
               className="text-sm font-medium hover:text-primary"
               onClick={() => setIsMenuOpen(false)}
             >
               Pricing
             </Link>
-            <Link 
-              to="/about" 
+            <Link
+              to="/about"
               className="text-sm font-medium hover:text-primary"
               onClick={() => setIsMenuOpen(false)}
             >
               About
             </Link>
-            
+
             {isLoggedIn ? (
               <div className="flex flex-col space-y-2 pt-2">
-                <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="outline" className="w-full">Dashboard</Button>
+                 <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>
+                  <Button variant="outline" className="w-full gap-2">
+                     <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </Button>
                 </Link>
                 <Link to="/profile" onClick={() => setIsMenuOpen(false)}>
                   <Button className="w-full gap-2">
@@ -103,6 +113,10 @@ export function Navbar() {
                     Profile
                   </Button>
                 </Link>
+                 {/* Add Logout Button */}
+                <Button variant="ghost" className="w-full" onClick={() => { /* Implement logout logic */ setIsMenuOpen(false)}}>
+                  Logout
+                </Button>
               </div>
             ) : (
               <div className="flex flex-col space-y-2 pt-2">
