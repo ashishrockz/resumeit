@@ -8,11 +8,11 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { initiateATSCheck, getATSCheckResult, applyOptimizationSuggestion } from "@/api/ats"; // Import ATS API functions
 import { useToast } from "@/hooks/use-toast"; // Import useToast from hooks
-import { useParams } from "react-router-dom"; // Assuming resumeId comes from URL
+import { useParams, Link } from "react-router-dom"; // Assuming resumeId comes from URL
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2 } from "lucide-react"; // Import Loader2
 
 // Assuming resumeId is passed as a URL parameter, e.g., /ats-check/:resumeId
 // You would navigate to this page from the user dashboard or resume editor.
@@ -48,7 +48,7 @@ export function ATSCheckPage() {
   });
 
   // Query to fetch ATS check results
-  const { data: atsResult, isLoading: isLoadingATSResult, refetch: refetchATSResult } = useQuery({
+  const { data: atsResult, isLoading: isLoadingATSResult, refetch: refetchATSResult, error: atsResultError } = useQuery({
     queryKey: ['atsCheckResult', atsScoreId],
     queryFn: () => getATSCheckResult(atsScoreId!),
     enabled: atsScoreId !== null, // Only run when atsScoreId is available
@@ -119,7 +119,9 @@ export function ATSCheckPage() {
         {!resumeIdNumber && (
            <div className="text-center text-muted-foreground py-12">
             <p>Please select a resume from your dashboard to use the ATS checker.</p>
-             {/* TODO: Add a link to the dashboard */}
+             <Link to="/dashboard" className="mt-4 inline-block">
+               <Button>Go to Dashboard</Button>
+             </Link>
           </div>
         )}
 
@@ -152,7 +154,14 @@ export function ATSCheckPage() {
                   />
                 </div>
                 <Button type="submit" disabled={initiateATSCheckMutation.isPending}>
-                  {initiateATSCheckMutation.isPending ? "Analyzing..." : "Check ATS Score"}
+                  {initiateATSCheckMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    "Check ATS Score"
+                  )}
                 </Button>
               </form>
             </CardContent>
@@ -171,11 +180,26 @@ export function ATSCheckPage() {
                  <span>{atsResult?.score || 0}%</span>
               </div>
               <p className="text-muted-foreground text-sm mt-2">
-                Please wait while we analyze your resume against the job description.
+                Please wait while we analyze your resume against the job description. This may take a moment.
               </p>
             </CardContent>
           </Card>
         )}
+
+         {atsResultError && atsScoreId !== null && (
+           <Card className="mb-8 border-destructive">
+             <CardHeader>
+               <CardTitle className="text-destructive">Error Analyzing Resume</CardTitle>
+             </CardHeader>
+             <CardContent>
+               <p className="text-muted-foreground">
+                 An error occurred while fetching the ATS check results: {atsResultError.message}
+               </p>
+                <Button variant="outline" className="mt-4" onClick={() => refetchATSResult()}>Retry Analysis</Button>
+             </CardContent>
+           </Card>
+         )}
+
 
         {atsResult && atsResult.score !== undefined && (
           <Card className="mb-8">
@@ -192,7 +216,7 @@ export function ATSCheckPage() {
                       <Badge
                         key={match.id}
                         variant={match.found ? "default" : "secondary"}
-                        className={`flex items-center justify-center py-2 ${match.found ? 'bg-green-500' : 'bg-red-500'}`}
+                        className={`flex items-center justify-center py-2 ${match.found ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'} text-white`}
                       >
                         {match.found ? <CheckCircle2 className="mr-1 h-4 w-4" /> : <XCircle className="mr-1 h-4 w-4" />}
                         {match.keyword} ({match.importance})
