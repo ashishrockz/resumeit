@@ -1,24 +1,24 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"; // Import useQueryClient
-import { getUsers, User, createUser } from "@/api/user"; // Import createUser
-import { getTemplates } from "@/api/template";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getUsers, User, createUser } from "@/api/user";
+import { getTemplates, Template } from "@/api/template"; // Import Template type
 import { getSubscriptions, getTransactions } from "@/api/subscriptions";
 import { getAllResumes } from "@/api/resumes";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, FileTextIcon, DollarSign, FileText, Loader2, Edit, PlusCircle, Eye, EyeOff } from "lucide-react"; // Import PlusCircle, Eye, EyeOff
+import { Users, FileTextIcon, DollarSign, FileText, Loader2, Edit, PlusCircle, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button"; // Import Button
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"; // Import Dialog components
-import { Label } from "@/components/ui/label"; // Import Label
-import { Input } from "@/components/ui/input"; // Import Input
-import { useState } from "react"; // Import useState
-import { useForm } from "react-hook-form"; // Import useForm
-import { zodResolver } from "@hookform/resolvers/zod"; // Import zodResolver
-import * as z from "zod"; // Import z
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"; // Import form components
-import { useToast } from "@/hooks/use-toast"; // Import useToast
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
 
 
 // Assuming a basic type for Subscription data based on Swagger
@@ -48,11 +48,11 @@ const createUserFormSchema = z.object({
 
 
 export function AdminDashboardPage() {
-  const queryClient = useQueryClient(); // Initialize query client
-  const { toast } = useToast(); // Initialize toast
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // State for password visibility
+  const [showPassword, setShowPassword] = useState(false);
 
   // Fetch data for admin dashboard
   const { data: users, isLoading: isLoadingUsers, error: usersError } = useQuery({
@@ -60,7 +60,7 @@ export function AdminDashboardPage() {
     queryFn: getUsers,
   });
 
-  const { data: templates, isLoading: isLoadingTemplates } = useQuery({
+  const { data: templates, isLoading: isLoadingTemplates, error: templatesError } = useQuery({ // Added error handling
     queryKey: ['adminTemplates'],
     queryFn: getTemplates,
   });
@@ -113,9 +113,9 @@ export function AdminDashboardPage() {
         title: "User Created",
         description: "A new user account has been created.",
       });
-      setIsCreateUserModalOpen(false); // Close the modal
-      createUserForm.reset(); // Reset the form
-      queryClient.invalidateQueries({ queryKey: ['adminUsers'] }); // Invalidate users query to refetch
+      setIsCreateUserModalOpen(false);
+      createUserForm.reset();
+      queryClient.invalidateQueries({ queryKey: ['adminUsers'] });
     },
     onError: (error: Error) => {
       toast({
@@ -412,7 +412,7 @@ export function AdminDashboardPage() {
       </Card>
 
        {/* Subscription Management Section */}
-       <Card className="shadow-lg">
+       <Card className="shadow-lg mb-12"> {/* Added bottom margin */}
         <CardHeader>
           <CardTitle className="text-2xl font-semibold">Subscription Management</CardTitle>
         </CardHeader>
@@ -465,6 +465,63 @@ export function AdminDashboardPage() {
           ) : (
             <div className="text-center text-muted-foreground">
               <p>No subscriptions found.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+       {/* Template Management Section */}
+       <Card className="shadow-lg"> {/* Added shadow */}
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-2xl font-semibold">Template Management</CardTitle> {/* Styled title */}
+           {/* TODO: Add Create New Template Button */}
+        </CardHeader>
+        <CardContent>
+          {isLoadingTemplates ? (
+            <div className="flex justify-center items-center h-40">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" /> {/* Loading spinner */}
+            </div>
+          ) : templatesError ? (
+            <div className="text-center text-destructive"> {/* Error message styling */}
+              <p>Error loading templates: {templatesError.message}</p>
+            </div>
+          ) : templates?.results && templates.results.length > 0 ? (
+            <div className="overflow-x-auto"> {/* Added overflow for responsiveness */}
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Premium</TableHead>
+                    <TableHead>Active</TableHead>
+                    <TableHead>Created At</TableHead>
+                    <TableHead className="text-right">Actions</TableHead> {/* Actions column */}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {templates.results.map((template: Template) => (
+                    <TableRow key={template.id}>
+                      <TableCell className="font-medium">{template.name}</TableCell>
+                      <TableCell>{template.category?.name || 'N/A'}</TableCell> {/* Display category name */}
+                      <TableCell>{template.is_premium ? 'Yes' : 'No'}</TableCell>
+                      <TableCell>{template.is_active ? 'Yes' : 'No'}</TableCell>
+                      <TableCell>{new Date(template.created_at).toLocaleDateString()}</TableCell>
+                      <TableCell className="text-right">
+                        {/* TODO: Add action buttons (e.g., View Details, Edit, Delete) */}
+                         <Link to={`/admin/templates/${template.id}/edit`}> {/* Assuming an edit route */}
+                           <Button variant="outline" size="sm" className="gap-1">
+                             <Edit className="h-3 w-3" /> Edit
+                           </Button>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="text-center text-muted-foreground">
+              <p>No templates found.</p>
             </div>
           )}
         </CardContent>
