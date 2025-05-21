@@ -1,7 +1,3 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
@@ -13,10 +9,14 @@ import { TemplateDownloadPage } from "./pages/TemplateDownloadPage";
 import { AdminDashboardPage } from "./pages/AdminDashboardPage";
 import { AdminUserDetailPage } from "./pages/AdminUserDetailPage";
 import { AdminSubscriptionDetailPage } from "./pages/AdminSubscriptionDetailPage";
-import { AdminSubscriptionsListPage } from "./pages/AdminSubscriptionsListPage"; // Import AdminSubscriptionsListPage
+import { AdminSubscriptionsListPage } from "./pages/AdminSubscriptionsListPage";
 import { ATSCheckPage } from "./pages/ATSCheckPage";
 import NotFound from '@/pages/NotFound'; // Use default import for NotFound
+import { Toaster } from "@/components/ui/toaster";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAuth } from "./hooks/useAuth";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster as Sonner } from "@/components/ui/sonner";
 
 
 const queryClient = new QueryClient();
