@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getUsers, User, createUser } from "@/api/user";
-import { getTemplates, Template } from "@/api/template"; // Import Template type
+import { getTemplates, Template, createTemplate } from "@/api/template"; // Import Template and createTemplate
 import { getSubscriptions, getTransactions } from "@/api/subscriptions";
 import { getAllResumes } from "@/api/resumes";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,6 +19,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea"; // Import Textarea
+import { Checkbox } from "@/components/ui/checkbox"; // Import Checkbox
 
 
 // Assuming a basic type for Subscription data based on Swagger
@@ -46,12 +48,24 @@ const createUserFormSchema = z.object({
   path: ["password2"],
 });
 
+// Define form schema for creating a template
+const createTemplateFormSchema = z.object({
+  name: z.string().min(1, "Template Name is required"),
+  description: z.string().optional(),
+  category: z.number().optional().nullable(), // Assuming category is a number ID
+  html_structure: z.string().min(1, "HTML Structure is required"),
+  css_styles: z.string().optional(),
+  is_premium: z.boolean().default(false),
+  is_active: z.boolean().default(true),
+});
+
 
 export function AdminDashboardPage() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
+  const [isCreateTemplateModalOpen, setIsCreateTemplateModalOpen] = useState(false); // State for template modal
   const [showPassword, setShowPassword] = useState(false);
 
   // Fetch data for admin dashboard
@@ -60,7 +74,7 @@ export function AdminDashboardPage() {
     queryFn: getUsers,
   });
 
-  const { data: templates, isLoading: isLoadingTemplates, error: templatesError } = useQuery({ // Added error handling
+  const { data: templates, isLoading: isLoadingTemplates, error: templatesError } = useQuery({
     queryKey: ['adminTemplates'],
     queryFn: getTemplates,
   });
@@ -128,6 +142,45 @@ export function AdminDashboardPage() {
 
   const handleCreateUserSubmit = (values: z.infer<typeof createUserFormSchema>) => {
     createUserMutation.mutate(values);
+  };
+
+  // Form for creating a new template
+  const createTemplateForm = useForm<z.infer<typeof createTemplateFormSchema>>({
+    resolver: zodResolver(createTemplateFormSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      category: null,
+      html_structure: "",
+      css_styles: "",
+      is_premium: false,
+      is_active: true,
+    },
+  });
+
+  // Mutation to create a new template
+  const createTemplateMutation = useMutation({
+    mutationFn: createTemplate,
+    onSuccess: () => {
+      toast({
+        title: "Template Created",
+        description: "A new template has been added.",
+      });
+      setIsCreateTemplateModalOpen(false); // Close the modal
+      createTemplateForm.reset(); // Reset the form
+      queryClient.invalidateQueries({ queryKey: ['adminTemplates'] }); // Invalidate templates query to refetch
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Failed to Create Template",
+        description: error.message || "An error occurred while creating the template.",
+      });
+    },
+  });
+
+  const handleCreateTemplateSubmit = (values: z.infer<typeof createTemplateFormSchema>) => {
+    createTemplateMutation.mutate(values);
   };
 
 
@@ -412,7 +465,7 @@ export function AdminDashboardPage() {
       </Card>
 
        {/* Subscription Management Section */}
-       <Card className="shadow-lg mb-12"> {/* Added bottom margin */}
+       <Card className="shadow-lg mb-12">
         <CardHeader>
           <CardTitle className="text-2xl font-semibold">Subscription Management</CardTitle>
         </CardHeader>
@@ -471,22 +524,163 @@ export function AdminDashboardPage() {
       </Card>
 
        {/* Template Management Section */}
-       <Card className="shadow-lg"> {/* Added shadow */}
+       <Card className="shadow-lg">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-2xl font-semibold">Template Management</CardTitle> {/* Styled title */}
-           {/* TODO: Add Create New Template Button */}
+          <CardTitle className="text-2xl font-semibold">Template Management</CardTitle>
+           <Dialog open={isCreateTemplateModalOpen} onOpenChange={setIsCreateTemplateModalOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="gap-1">
+                <PlusCircle className="h-4 w-4" /> Create New Template
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Create New Template</DialogTitle>
+              </DialogHeader>
+              <Form {...createTemplateForm}>
+                <form onSubmit={createTemplateForm.handleSubmit(handleCreateTemplateSubmit)} className="space-y-4 py-4">
+                  <FormField
+                    control={createTemplateForm.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Template Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter template name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <FormField
+                    control={createTemplateForm.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description (Optional)</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Enter description" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   {/* TODO: Add Category Select Input */}
+                   {/* <FormField
+                      control={createTemplateForm.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Category (Optional)</FormLabel>
+                          <FormControl>
+                             <Select onValueChange={(value) => field.onChange(value ? parseInt(value) : null)} value={field.value?.toString() || ""}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                 TODO: Map over fetched categories
+                                <SelectItem value="1">Category 1</SelectItem>
+                                <SelectItem value="2">Category 2</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    /> */}
+                   <FormField
+                    control={createTemplateForm.control}
+                    name="html_structure"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>HTML Structure</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Enter HTML structure" rows={8} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <FormField
+                    control={createTemplateForm.control}
+                    name="css_styles"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>CSS Styles (Optional)</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Enter CSS styles" rows={8} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <FormField
+                      control={createTemplateForm.control}
+                      name="is_premium"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>
+                              Premium Template
+                            </FormLabel>
+                             <FormMessage />
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                     <FormField
+                      control={createTemplateForm.control}
+                      name="is_active"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>
+                              Active Template
+                            </FormLabel>
+                             <FormMessage />
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                   <DialogFooter>
+                    <Button type="submit" disabled={createTemplateMutation.isPending}>
+                      {createTemplateMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating...
+                        </>
+                      ) : (
+                        "Create Template"
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
         </CardHeader>
         <CardContent>
           {isLoadingTemplates ? (
             <div className="flex justify-center items-center h-40">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" /> {/* Loading spinner */}
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : templatesError ? (
-            <div className="text-center text-destructive"> {/* Error message styling */}
+            <div className="text-center text-destructive">
               <p>Error loading templates: {templatesError.message}</p>
             </div>
           ) : templates?.results && templates.results.length > 0 ? (
-            <div className="overflow-x-auto"> {/* Added overflow for responsiveness */}
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -495,20 +689,20 @@ export function AdminDashboardPage() {
                     <TableHead>Premium</TableHead>
                     <TableHead>Active</TableHead>
                     <TableHead>Created At</TableHead>
-                    <TableHead className="text-right">Actions</TableHead> {/* Actions column */}
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {templates.results.map((template: Template) => (
                     <TableRow key={template.id}>
                       <TableCell className="font-medium">{template.name}</TableCell>
-                      <TableCell>{template.category?.name || 'N/A'}</TableCell> {/* Display category name */}
+                      <TableCell>{template.category?.name || 'N/A'}</TableCell>
                       <TableCell>{template.is_premium ? 'Yes' : 'No'}</TableCell>
                       <TableCell>{template.is_active ? 'Yes' : 'No'}</TableCell>
                       <TableCell>{new Date(template.created_at).toLocaleDateString()}</TableCell>
                       <TableCell className="text-right">
                         {/* TODO: Add action buttons (e.g., View Details, Edit, Delete) */}
-                         <Link to={`/admin/templates/${template.id}/edit`}> {/* Assuming an edit route */}
+                         <Link to={`/admin/templates/${template.id}/edit`}>
                            <Button variant="outline" size="sm" className="gap-1">
                              <Edit className="h-3 w-3" /> Edit
                            </Button>

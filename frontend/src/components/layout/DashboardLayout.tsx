@@ -40,6 +40,24 @@ export function DashboardLayout({ children, isAdmin = false }: DashboardLayoutPr
             </Link>
           </div>
           {/* TODO: Add any global header elements here (e.g., user profile, notifications) */}
+           <nav className="hidden md:flex items-center gap-6">
+            {isAdmin ? (
+              <>
+                <Link to="/admin/users" className="text-sm font-medium hover:text-primary">
+                  Users
+                </Link>
+                <Link to="/admin/subscriptions" className="text-sm font-medium hover:text-primary">
+                  Subscriptions
+                </Link>
+                 {/* Add other admin header links here if needed */}
+              </>
+            ) : (
+              <>
+                 {/* User specific header links if any */}
+              </>
+            )}
+           </nav>
+
 
           {/* Mobile Sidebar Trigger */}
           <Sheet>
@@ -76,7 +94,7 @@ export function DashboardLayout({ children, isAdmin = false }: DashboardLayoutPr
       {/* Main Content Area with Sidebar */}
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         {/* Sidebar Panel */}
-        <ResizablePanel defaultSize={15} minSize={10} maxSize={20} className="hidden md:block"> {/* Removed hidden md:block */}
+        <ResizablePanel defaultSize={15} minSize={10} maxSize={20} className="hidden md:block">
           <div className="flex flex-col h-full p-4">
              <div className="flex items-center gap-2 mb-6">
                 <FileText className="h-6 w-6 text-primary" />
@@ -101,7 +119,7 @@ export function DashboardLayout({ children, isAdmin = false }: DashboardLayoutPr
         </ResizablePanel>
 
         {/* Resizable Handle */}
-        <ResizableHandle withHandle className="hidden md:flex" /> {/* Removed hidden md:flex */}
+        <ResizableHandle withHandle className="hidden md:flex" />
 
         {/* Content Panel */}
         <ResizablePanel defaultSize={85}>
