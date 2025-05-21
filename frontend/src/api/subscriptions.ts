@@ -29,3 +29,19 @@ export const getTransactions = async () => {
 
   return response.json();
 };
+
+// Function to fetch details of a single subscription
+export const getSubscriptionDetails = async (id: number) => {
+  const response = await fetch(`${API_URL}/subscriptions/${id}/`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('accessToken')}`, // Assuming admin token
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || `Failed to fetch subscription details for ID ${id}`);
+  }
+
+  return response.json();
+};

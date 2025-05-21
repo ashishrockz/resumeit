@@ -11,6 +11,7 @@ import { TemplateSelectionPage } from "./pages/TemplateSelectionPage";
 import { TemplateCreationPage } from "./pages/TemplateCreationPage";
 import { TemplateDownloadPage } from "./pages/TemplateDownloadPage";
 import { AdminDashboardPage } from "./pages/AdminDashboardPage"; // Import AdminDashboardPage
+import { AdminSubscriptionDetailPage } from "./pages/AdminSubscriptionDetailPage"; // Import AdminSubscriptionDetailPage
 import { ATSCheckPage } from "./pages/ATSCheckPage"; // Import ATSCheckPage
 import NotFound from "./pages/NotFound";
 
@@ -99,6 +100,14 @@ function App() {
               element={
                 <ProtectedRoute adminOnly={true}>
                   <AdminDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+             <Route // New route for subscription details
+              path="/admin/subscriptions/:id"
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminSubscriptionDetailPage />
                 </ProtectedRoute>
               }
             />

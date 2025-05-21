@@ -12,14 +12,14 @@ export function DashboardLayout({ children, isAdmin = false }: DashboardLayoutPr
   const navItems = isAdmin
     ? [
         { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-        { name: "Users", href: "/admin/users", icon: Users },
-        { name: "Templates", href: "/admin/templates", icon: FileTextIcon },
-        { name: "Subscriptions", href: "/admin/subscriptions", icon: DollarSign },
+        { name: "Users", href: "/admin/users", icon: Users }, // TODO: Create Admin Users Page
+        { name: "Templates", href: "/admin/templates", icon: FileTextIcon }, // TODO: Create Admin Templates Page
+        { name: "Subscriptions", href: "/admin/subscriptions", icon: DollarSign }, // Link to subscriptions list (will be on dashboard for now)
         // Add more admin specific links here
       ]
     : [
         { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-        { name: "My Resumes", href: "/dashboard/resumes", icon: FileTextIcon },
+        { name: "My Resumes", href: "/dashboard/resumes", icon: FileTextIcon }, // TODO: Create User Resumes Page
         { name: "Templates", href: "/templates", icon: FileTextIcon },
         // Add more user specific links here
       ];
