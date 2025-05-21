@@ -14,7 +14,9 @@ import { AdminDashboardPage } from "./pages/AdminDashboardPage"; // Import Admin
 import { AdminUserDetailPage } from "./pages/AdminUserDetailPage"; // Import AdminUserDetailPage
 import { AdminSubscriptionDetailPage } from "./pages/AdminSubscriptionDetailPage"; // Import AdminSubscriptionDetailPage
 import { ATSCheckPage } from "./pages/ATSCheckPage"; // Import ATSCheckPage
-import NotFound from "./pages/NotFound";
+import NotFound from '@/pages/NotFound'; // Use default import for NotFound
+import { useAuth } from "./hooks/useAuth"; // Import useAuth hook
+
 
 const queryClient = new QueryClient();
 
@@ -40,6 +42,8 @@ function ProtectedRoute({ children, adminOnly = false }: { children: JSX.Element
 }
 
 function App() {
+  const { isAdmin } = useAuth(); // Get isAdmin from useAuth
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
