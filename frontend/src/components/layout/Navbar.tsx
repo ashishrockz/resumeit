@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, FileText, User, LogIn, LayoutDashboard, LogOut, Shield, Search } from "lucide-react"; // Import Search icon
+import { Menu, X, FileText, User, LogIn, LayoutDashboard, LogOut, Shield, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth"; // Import the useAuth hook
+import { useAuth } from "@/hooks/useAuth";
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { logout, isLoggingOut } = useAuth(); // Use the useAuth hook
-  const isLoggedIn = localStorage.getItem('accessToken') !== null; // Check for access token
+  const { logout, isLoggingOut } = useAuth();
+  const isLoggedIn = localStorage.getItem('accessToken') !== null;
   // TODO: Get actual user role and premium status from auth context or state
   const isAdmin = localStorage.getItem('userRole') === 'admin'; // Placeholder for role check
   const isPremium = true; // Placeholder for premium status
@@ -37,7 +37,8 @@ export function Navbar() {
 
           {isLoggedIn ? (
             <div className="flex items-center gap-4">
-              {isAdmin && (
+              {/* Admin and Dashboard links are now in DashboardLayout sidebar */}
+              {/* {isAdmin && (
                  <Link to="/admin/dashboard">
                   <Button variant="outline" size="sm" className="gap-2">
                      <Shield className="h-4 w-4" />
@@ -52,13 +53,13 @@ export function Navbar() {
                 </Button>
               </Link>
                {isPremium && (
-                 <Link to="/ats-check"> {/* Link to ATS Check page */}
+                 <Link to="/ats-check">
                   <Button variant="outline" size="sm" className="gap-2">
                      <Search className="h-4 w-4" />
                     ATS Check
                   </Button>
                 </Link>
-              )}
+              )} */}
               <Link to="/profile">
                 <Button size="sm" className="gap-2">
                   <User className="h-4 w-4" />
@@ -69,7 +70,7 @@ export function Navbar() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => logout()} // Call the logout function
+                onClick={() => logout()}
                 disabled={isLoggingOut}
                 className="gap-2"
               >
@@ -130,7 +131,8 @@ export function Navbar() {
 
             {isLoggedIn ? (
               <div className="flex flex-col space-y-2 pt-2">
-                 {isAdmin && (
+                 {/* Admin and Dashboard links are now in DashboardLayout sidebar */}
+                 {/* {isAdmin && (
                    <Link to="/admin/dashboard" onClick={() => setIsMenuOpen(false)}>
                     <Button variant="outline" className="w-full gap-2">
                        <Shield className="h-4 w-4" />
@@ -145,13 +147,13 @@ export function Navbar() {
                   </Button>
                 </Link>
                  {isPremium && (
-                   <Link to="/ats-check" onClick={() => setIsMenuOpen(false)}> {/* Link to ATS Check page */}
+                   <Link to="/ats-check" onClick={() => setIsMenuOpen(false)}>
                     <Button variant="outline" className="w-full gap-2">
                        <Search className="h-4 w-4" />
                       ATS Check
                     </Button>
                   </Link>
-                )}
+                )} */}
                 <Link to="/profile" onClick={() => setIsMenuOpen(false)}>
                   <Button className="w-full gap-2">
                     <User className="h-4 w-4" />
@@ -162,7 +164,7 @@ export function Navbar() {
                 <Button
                   variant="ghost"
                   className="w-full gap-2"
-                  onClick={() => { logout(); setIsMenuOpen(false); }} // Call logout and close menu
+                  onClick={() => { logout(); setIsMenuOpen(false); }}
                   disabled={isLoggingOut}
                 >
                    <LogOut className="h-4 w-4" />
