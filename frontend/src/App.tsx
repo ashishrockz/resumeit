@@ -11,6 +11,7 @@ import { TemplateSelectionPage } from "./pages/TemplateSelectionPage";
 import { TemplateCreationPage } from "./pages/TemplateCreationPage";
 import { TemplateDownloadPage } from "./pages/TemplateDownloadPage";
 import { AdminDashboardPage } from "./pages/AdminDashboardPage"; // Import AdminDashboardPage
+import { AdminUserDetailPage } from "./pages/AdminUserDetailPage"; // Import AdminUserDetailPage
 import { AdminSubscriptionDetailPage } from "./pages/AdminSubscriptionDetailPage"; // Import AdminSubscriptionDetailPage
 import { ATSCheckPage } from "./pages/ATSCheckPage"; // Import ATSCheckPage
 import NotFound from "./pages/NotFound";
@@ -103,6 +104,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
+             <Route // New route for user details
+              path="/admin/users/:id"
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminUserDetailPage />
+                </ProtectedRoute>
+              }
+            />
              <Route // New route for subscription details
               path="/admin/subscriptions/:id"
               element={
@@ -111,7 +120,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            {/* TODO: Add more admin routes (users, templates, subscriptions) */}
+            {/* TODO: Add more admin routes (templates, transactions, etc.) */}
 
 
             <Route path="*" element={<NotFound />} />

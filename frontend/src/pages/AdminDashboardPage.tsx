@@ -7,8 +7,8 @@ import { getTemplates } from "@/api/template";
 import { getSubscriptions, getTransactions } from "@/api/subscriptions";
 import { getAllResumes } from "@/api/resumes";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, FileTextIcon, DollarSign, FileText, Loader2 } from "lucide-react";
-import { Link } from "react-router-dom"; // Import Link
+import { Users, FileTextIcon, DollarSign, FileText, Loader2, Edit } from "lucide-react"; // Import Edit icon
+import { Link } from "react-router-dom";
 
 // Assuming a basic type for Subscription data based on Swagger
 interface Subscription {
@@ -35,7 +35,7 @@ export function AdminDashboardPage() {
     queryFn: getTemplates,
   });
 
-  const { data: subscriptions, isLoading: isLoadingSubscriptions, error: subscriptionsError } = useQuery({ // Added error handling
+  const { data: subscriptions, isLoading: isLoadingSubscriptions, error: subscriptionsError } = useQuery({
     queryKey: ['adminSubscriptions'],
     queryFn: getSubscriptions,
   });
@@ -143,7 +143,7 @@ export function AdminDashboardPage() {
 
 
       {/* User Management Section */}
-      <Card className="shadow-lg mb-12"> {/* Added bottom margin */}
+      <Card className="shadow-lg mb-12">
         <CardHeader>
           <CardTitle className="text-2xl font-semibold">User Management</CardTitle>
         </CardHeader>
@@ -180,8 +180,12 @@ export function AdminDashboardPage() {
                       <TableCell>{user.is_verified ? 'Yes' : 'No'}</TableCell>
                       <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
                       <TableCell className="text-right">
-                        {/* TODO: Add action buttons (e.g., View Details, Edit, Delete) */}
-                        <span className="text-muted-foreground text-sm">Coming Soon</span>
+                        <Link to={`/admin/users/${user.id}`}> {/* Link to user detail page */}
+                           <Button variant="outline" size="sm" className="gap-1">
+                             <Edit className="h-3 w-3" /> Edit
+                           </Button>
+                        </Link>
+                        {/* TODO: Add Delete User functionality */}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -197,21 +201,21 @@ export function AdminDashboardPage() {
       </Card>
 
        {/* Subscription Management Section */}
-       <Card className="shadow-lg"> {/* Added shadow */}
+       <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle className="text-2xl font-semibold">Subscription Management</CardTitle> {/* Styled title */}
+          <CardTitle className="text-2xl font-semibold">Subscription Management</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoadingSubscriptions ? (
             <div className="flex justify-center items-center h-40">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" /> {/* Loading spinner */}
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : subscriptionsError ? (
-            <div className="text-center text-destructive"> {/* Error message styling */}
+            <div className="text-center text-destructive">
               <p>Error loading subscriptions: {subscriptionsError.message}</p>
             </div>
           ) : subscriptions?.results && subscriptions.results.length > 0 ? (
-            <div className="overflow-x-auto"> {/* Added overflow for responsiveness */}
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -223,25 +227,24 @@ export function AdminDashboardPage() {
                     <TableHead>End Date</TableHead>
                     <TableHead>Auto Renew</TableHead>
                     <TableHead>Created At</TableHead>
-                    <TableHead className="text-right">Actions</TableHead> {/* Actions column */}
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {subscriptions.results.map((subscription: Subscription) => (
                     <TableRow key={subscription.id}>
                       <TableCell className="font-medium">{subscription.id}</TableCell>
-                      <TableCell>{subscription.user?.username || 'N/A'}</TableCell> {/* Handle potential null user */}
-                      <TableCell>{subscription.plan?.name || 'N/A'}</TableCell> {/* Handle potential null plan */}
+                      <TableCell>{subscription.user?.username || 'N/A'}</TableCell>
+                      <TableCell>{subscription.plan?.name || 'N/A'}</TableCell>
                       <TableCell>{subscription.status}</TableCell>
                       <TableCell>{subscription.start_date ? new Date(subscription.start_date).toLocaleDateString() : 'N/A'}</TableCell>
                       <TableCell>{subscription.end_date ? new Date(subscription.end_date).toLocaleDateString() : 'N/A'}</TableCell>
                       <TableCell>{subscription.is_auto_renew ? 'Yes' : 'No'}</TableCell>
                       <TableCell>{new Date(subscription.created_at).toLocaleDateString()}</TableCell>
                       <TableCell className="text-right">
-                        <Link to={`/admin/subscriptions/${subscription.id}`}> {/* Link to detail page */}
+                        <Link to={`/admin/subscriptions/${subscription.id}`}>
                            <Button variant="outline" size="sm">View Details</Button>
                         </Link>
-                        {/* TODO: Add more action buttons (e.g., Edit, Cancel) */}
                       </TableCell>
                     </TableRow>
                   ))}
