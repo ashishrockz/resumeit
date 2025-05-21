@@ -12,6 +12,17 @@ export interface User {
   created_at: string;
 }
 
+// Define type for creating a user based on Swagger UserRegistration
+interface CreateUserData {
+  username: string;
+  email?: string;
+  full_name?: string;
+  phone_number?: string;
+  password: string;
+  password2: string; // Confirm password field
+}
+
+
 export const getUsers = async () => {
   const response = await fetch(`${API_URL}/users/`, {
     headers: {
@@ -57,6 +68,26 @@ export const updateUser = async (id: number, data: any) => { // Use 'any' for no
   if (!response.ok) {
     const error = await response.json();
     throw new Error(Object.values(error).flat().join(', ') || `Failed to update user with ID ${id}`);
+  }
+
+  return response.json();
+};
+
+// Function to create a new user
+export const createUser = async (data: CreateUserData) => {
+  const response = await fetch(`${API_URL}/users/register/`, { // Use the registration endpoint
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      // Assuming admin token is not needed for this endpoint, or handled by backend
+      // 'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(Object.values(error).flat().join(', ') || 'Failed to create user');
   }
 
   return response.json();
