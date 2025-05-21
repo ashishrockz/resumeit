@@ -71,8 +71,7 @@ export const getATSCheckResult = async (atsScoreId: number): Promise<ATSCheckRes
 export const applyOptimizationSuggestion = async (atsScoreId: number, suggestionId: number) => {
    // Based on Swagger, apply_suggestion is a POST to /ats/scores/{id}/apply_suggestion/
    // The body seems to be the ATSScore object, which might not be correct for applying a single suggestion.
-   // Assuming the backend expects the suggestion ID in the body or URL for now.
-   // Let's assume the backend expects the suggestion ID in the body for now.
+   // Assuming the backend expects the suggestion ID in the body for now.
   const response = await fetch(`${API_URL}/ats/scores/${atsScoreId}/apply_suggestion/`, {
     method: 'POST',
     headers: {
