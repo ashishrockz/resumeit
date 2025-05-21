@@ -1,24 +1,24 @@
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { FileText, LayoutDashboard, Users, FileTextIcon, DollarSign, Menu } from "lucide-react"; // Import Menu icon
+import { FileText, LayoutDashboard, Users, FileTextIcon, DollarSign, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable"; // Import resizable components
-import { Separator } from "@/components/ui/separator"; // Import Separator
-import { Button } from "@/components/ui/button"; // Import Button
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"; // Import Sheet for mobile sidebar
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 interface DashboardLayoutProps {
   children: ReactNode;
-  isAdmin?: boolean; // Prop to differentiate between user and admin dashboard
+  isAdmin?: boolean;
 }
 
 export function DashboardLayout({ children, isAdmin = false }: DashboardLayoutProps) {
   const navItems = isAdmin
     ? [
         { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-        { name: "Users", href: "/admin/users", icon: Users }, // TODO: Create Admin Users Page
+        { name: "Users", href: "/admin/users", icon: Users }, // Link to admin users list
         { name: "Templates", href: "/admin/templates", icon: FileTextIcon }, // TODO: Create Admin Templates Page
-        { name: "Subscriptions", href: "/admin/subscriptions", icon: DollarSign }, // Link to subscriptions list (will be on dashboard for now)
+        { name: "Subscriptions", href: "/admin/subscriptions", icon: DollarSign }, // Link to admin subscriptions list
         // Add more admin specific links here
       ]
     : [

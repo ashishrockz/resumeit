@@ -10,12 +10,13 @@ import { UserDashboardPage } from "./pages/UserDashboardPage";
 import { TemplateSelectionPage } from "./pages/TemplateSelectionPage";
 import { TemplateCreationPage } from "./pages/TemplateCreationPage";
 import { TemplateDownloadPage } from "./pages/TemplateDownloadPage";
-import { AdminDashboardPage } from "./pages/AdminDashboardPage"; // Import AdminDashboardPage
-import { AdminUserDetailPage } from "./pages/AdminUserDetailPage"; // Import AdminUserDetailPage
-import { AdminSubscriptionDetailPage } from "./pages/AdminSubscriptionDetailPage"; // Import AdminSubscriptionDetailPage
-import { ATSCheckPage } from "./pages/ATSCheckPage"; // Import ATSCheckPage
+import { AdminDashboardPage } from "./pages/AdminDashboardPage";
+import { AdminUserDetailPage } from "./pages/AdminUserDetailPage";
+import { AdminSubscriptionDetailPage } from "./pages/AdminSubscriptionDetailPage";
+import { AdminSubscriptionsListPage } from "./pages/AdminSubscriptionsListPage"; // Import AdminSubscriptionsListPage
+import { ATSCheckPage } from "./pages/ATSCheckPage";
 import NotFound from '@/pages/NotFound'; // Use default import for NotFound
-import { useAuth } from "./hooks/useAuth"; // Import useAuth hook
+import { useAuth } from "./hooks/useAuth";
 
 
 const queryClient = new QueryClient();
@@ -42,7 +43,7 @@ function ProtectedRoute({ children, adminOnly = false }: { children: JSX.Element
 }
 
 function App() {
-  const { isAdmin } = useAuth(); // Get isAdmin from useAuth
+  const { isAdmin } = useAuth();
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -108,7 +109,16 @@ function App() {
                 </ProtectedRoute>
               }
             />
-             <Route // New route for user details
+             <Route // Route for admin users list
+              path="/admin/users"
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  {/* TODO: Create AdminUsersListPage */}
+                   <AdminDashboardPage /> {/* Temporarily using dashboard to show user list */}
+                </ProtectedRoute>
+              }
+            />
+             <Route // Route for individual user details
               path="/admin/users/:id"
               element={
                 <ProtectedRoute adminOnly={true}>
@@ -116,7 +126,15 @@ function App() {
                 </ProtectedRoute>
               }
             />
-             <Route // New route for subscription details
+             <Route // Route for admin subscriptions list
+              path="/admin/subscriptions"
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminSubscriptionsListPage /> {/* Use the new list page */}
+                </ProtectedRoute>
+              }
+            />
+             <Route // Route for individual subscription details
               path="/admin/subscriptions/:id"
               element={
                 <ProtectedRoute adminOnly={true}>
