@@ -1,14 +1,25 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useQuery } from "@tanstack/react-query";
-import { getUsers, User } from "@/api/user";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"; // Import useQueryClient
+import { getUsers, User, createUser } from "@/api/user"; // Import createUser
 import { getTemplates } from "@/api/template";
 import { getSubscriptions, getTransactions } from "@/api/subscriptions";
 import { getAllResumes } from "@/api/resumes";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, FileTextIcon, DollarSign, FileText, Loader2, Edit } from "lucide-react"; // Import Edit icon
+import { Users, FileTextIcon, DollarSign, FileText, Loader2, Edit, PlusCircle, Eye, EyeOff } from "lucide-react"; // Import PlusCircle, Eye, EyeOff
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button"; // Import Button
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"; // Import Dialog components
+import { Label } from "@/components/ui/label"; // Import Label
+import { Input } from "@/components/ui/input"; // Import Input
+import { useState } from "react"; // Import useState
+import { useForm } from "react-hook-form"; // Import useForm
+import { zodResolver } from "@hookform/resolvers/zod"; // Import zodResolver
+import * as z from "zod"; // Import z
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"; // Import form components
+import { useToast } from "@/hooks/use-toast"; // Import useToast
+
 
 // Assuming a basic type for Subscription data based on Swagger
 interface Subscription {
@@ -22,8 +33,27 @@ interface Subscription {
   created_at: string;
 }
 
+// Define form schema for creating a user
+const createUserFormSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  email: z.string().email("Invalid email address").optional().or(z.literal('')),
+  full_name: z.string().optional(),
+  phone_number: z.string().optional(),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  password2: z.string(),
+}).refine((data) => data.password === data.password2, {
+  message: "Passwords don't match",
+  path: ["password2"],
+});
+
 
 export function AdminDashboardPage() {
+  const queryClient = useQueryClient(); // Initialize query client
+  const { toast } = useToast(); // Initialize toast
+
+  const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
+
   // Fetch data for admin dashboard
   const { data: users, isLoading: isLoadingUsers, error: usersError } = useQuery({
     queryKey: ['adminUsers'],
@@ -61,6 +91,44 @@ export function AdminDashboardPage() {
   // Placeholder calculations (replace with actual data processing)
   const premiumConversionRate = totalUsers > 0 ? `${((subscriptions?.results.filter((sub: any) => sub.status === 'active').length || 0) / totalUsers * 100).toFixed(2)}%` : "N/A";
   const totalRevenue = transactions?.results.reduce((sum: number, transaction: any) => sum + parseFloat(transaction.amount), 0).toFixed(2) || "0.00";
+
+  // Form for creating a new user
+  const createUserForm = useForm<z.infer<typeof createUserFormSchema>>({
+    resolver: zodResolver(createUserFormSchema),
+    defaultValues: {
+      username: "",
+      email: "",
+      full_name: "",
+      phone_number: "",
+      password: "",
+      password2: "",
+    },
+  });
+
+  // Mutation to create a new user
+  const createUserMutation = useMutation({
+    mutationFn: createUser,
+    onSuccess: () => {
+      toast({
+        title: "User Created",
+        description: "A new user account has been created.",
+      });
+      setIsCreateUserModalOpen(false); // Close the modal
+      createUserForm.reset(); // Reset the form
+      queryClient.invalidateQueries({ queryKey: ['adminUsers'] }); // Invalidate users query to refetch
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Failed to Create User",
+        description: error.message || "An error occurred while creating the user.",
+      });
+    },
+  });
+
+  const handleCreateUserSubmit = (values: z.infer<typeof createUserFormSchema>) => {
+    createUserMutation.mutate(values);
+  };
 
 
   return (
@@ -144,8 +212,151 @@ export function AdminDashboardPage() {
 
       {/* User Management Section */}
       <Card className="shadow-lg mb-12">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-2xl font-semibold">User Management</CardTitle>
+           <Dialog open={isCreateUserModalOpen} onOpenChange={setIsCreateUserModalOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="gap-1">
+                <PlusCircle className="h-4 w-4" /> Create New User
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Create New User</DialogTitle>
+              </DialogHeader>
+              <Form {...createUserForm}>
+                <form onSubmit={createUserForm.handleSubmit(handleCreateUserSubmit)} className="space-y-4 py-4">
+                  <FormField
+                    control={createUserForm.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Username</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter username" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <FormField
+                    control={createUserForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email (Optional)</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="Enter email" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <FormField
+                    control={createUserForm.control}
+                    name="full_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Full Name (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter full name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <FormField
+                    control={createUserForm.control}
+                    name="phone_number"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter phone number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <FormField
+                    control={createUserForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                           <div className="relative">
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              placeholder="Enter password"
+                              {...field}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <Eye className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <FormField
+                    control={createUserForm.control}
+                    name="password2"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm Password</FormLabel>
+                        <FormControl>
+                           <div className="relative">
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              placeholder="Confirm password"
+                              {...field}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <Eye className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <DialogFooter>
+                    <Button type="submit" disabled={createUserMutation.isPending}>
+                      {createUserMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating...
+                        </>
+                      ) : (
+                        "Create User"
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
         </CardHeader>
         <CardContent>
           {isLoadingUsers ? (
@@ -180,7 +391,7 @@ export function AdminDashboardPage() {
                       <TableCell>{user.is_verified ? 'Yes' : 'No'}</TableCell>
                       <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
                       <TableCell className="text-right">
-                        <Link to={`/admin/users/${user.id}`}> {/* Link to user detail page */}
+                        <Link to={`/admin/users/${user.id}`}>
                            <Button variant="outline" size="sm" className="gap-1">
                              <Edit className="h-3 w-3" /> Edit
                            </Button>
