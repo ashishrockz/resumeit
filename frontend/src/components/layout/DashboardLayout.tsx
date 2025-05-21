@@ -76,7 +76,7 @@ export function DashboardLayout({ children, isAdmin = false }: DashboardLayoutPr
       {/* Main Content Area with Sidebar */}
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         {/* Sidebar Panel */}
-        <ResizablePanel defaultSize={15} minSize={10} maxSize={20} className="hidden md:block">
+        <ResizablePanel defaultSize={15} minSize={10} maxSize={20} className="hidden md:block"> {/* Removed hidden md:block */}
           <div className="flex flex-col h-full p-4">
              <div className="flex items-center gap-2 mb-6">
                 <FileText className="h-6 w-6 text-primary" />
@@ -101,7 +101,7 @@ export function DashboardLayout({ children, isAdmin = false }: DashboardLayoutPr
         </ResizablePanel>
 
         {/* Resizable Handle */}
-        <ResizableHandle withHandle className="hidden md:flex" />
+        <ResizableHandle withHandle className="hidden md:flex" /> {/* Removed hidden md:flex */}
 
         {/* Content Panel */}
         <ResizablePanel defaultSize={85}>
